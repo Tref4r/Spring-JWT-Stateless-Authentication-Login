@@ -1,0 +1,133 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="ISO-8859-1">
+  <title>Registration and Login App</title>
+
+  <link rel="stylesheet"
+        href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css"
+        integrity="sha384-BVYiiSIFeK1dGmJRAkycuHAHRg32OmUcww7on3RYdg4Va+PmSTsz/K68vbdEjh4u"
+        crossorigin="anonymous">
+  <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
+</head>
+<body>
+
+<!-- create navigation bar ( header) -->
+<nav class="navbar navbar-inverse navbar-fixed-top">
+  <div class="container">
+    <div class="navbar-header">
+      <button type="button" class="navbar-toggle collapsed"
+              data-toggle="collapse" data-target="#navbar" aria-expanded="false"
+              aria-controls="navbar">
+        <span class="sr-only">Toggle navigation</span> <span
+              class="icon-bar"></span> <span class="icon-bar"></span> <span
+              class="icon-bar"></span>
+      </button>
+      <!-- Change href to point to the login page -->
+      <a class="navbar-brand" href="/login" th:href="@{/login}">Registration and
+        Login Module</a>
+    </div>
+  </div>
+</nav>
+
+<br>
+<br>
+<div class = "container">
+  <div class = "row">
+    <div class = "col-md-6 col-md-offset-3">
+
+      <h1> User Login Page </h1>
+      <form id="loginForm" method="post" action="/perform_login">
+
+
+        <!-- error message -->
+        <div id="errorDiv" style="display: none;">
+          <div class="alert alert-danger">Invalid username or
+            password.</div>
+        </div>
+
+        <!-- logout message -->
+        <div th:if="${param.logout}">
+          <div class="alert alert-info">You have been logged out.</div>
+        </div>
+
+        <div class="form-group">
+          <label for="email"> Email </label> :
+          <input type="text" class="form-control" id="email" name="email" placeholder="Enter Email ID" autofocus="autofocus">
+        </div>
+
+        <div class="form-group">
+          <label for="password">Password</label>:
+          <input type="password" id="password" name="password" class="form-control" placeholder="Enter Password" autocomplete="current-password" />
+        </div>
+
+        <!-- Add this new section for password recovery -->
+        <div class="form-group">
+          <a href="/password-recovery" class="btn btn-link">Forgot your password?</a>
+        </div>
+
+        <div class="form-group">
+          <div class="row">
+            <div class="col-sm-6 col-sm-offset-3">
+              <input type="submit" name="login-submit" id="login-submit"
+                     class="form-control btn btn-primary" value="Log In" />
+            </div>
+          </div>
+        </div>
+
+        <input type="checkbox" name="remember-me"/> Remember me
+      </form>
+      <div class="form-group">
+        <span>New user? <a href="/" th:href="@{/register}">Register
+          here</a></span>
+      </div>
+    </div>
+  </div>
+</div>
+<script>
+  document.querySelector('#loginForm').addEventListener('submit', function(event) {
+    event.preventDefault();
+
+    var email = document.getElementById('email').value;
+    var password = document.getElementById('password').value;
+
+    fetch('/login', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({
+        email: email,
+        password: password,
+      }),
+    })
+            .then(response => {
+              if (!response.ok) {
+                throw new Error('Invalid username or password');
+              }
+              return response.json();
+            })
+            .then(data => {
+              if (data.jwt) {
+                // Login successful
+                console.log('Login successful');
+                localStorage.setItem('jwt', data.jwt); // Save the JWT for future requests
+                // Redirect to home page or show success message
+              } else {
+                // Login failed
+                console.log('Login failed');
+                // Show error message on the page
+                var errorDiv = document.querySelector('#errorDiv');
+                errorDiv.style.display = 'block';
+              }
+            })
+            .catch((error) => {
+              console.error('Error:', error);
+              // handle failed login
+              var errorDiv = document.querySelector('#errorDiv');
+              errorDiv.style.display = 'block';
+            });
+  });
+</script>
+</body>
+</html>
